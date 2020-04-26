@@ -1,0 +1,22 @@
+{
+    "devenv": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-cmpe172-devenv-100409-authRole",
+            "UnauthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-devenv-100409-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-devenv-100409-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-cmpe172-devenv-100409-deployment",
+            "UnauthRoleName": "amplify-cmpe172-devenv-100409-unauthRole",
+            "StackName": "amplify-cmpe172-devenv-100409",
+            "StackId": "arn:aws:cloudformation:us-east-1:586644652616:stack/amplify-cmpe172-devenv-100409/f36d6130-87df-11ea-90d7-0ac49251e793",
+            "AmplifyAppId": "d1g5lhnp5r1dux"
+        },
+        "categories": {
+            "auth": {
+                "cmpe17289a6d05e": {
+                    "hostedUIProviderCreds": "[]"
+                }
+            }
+        }
+    }
+}
