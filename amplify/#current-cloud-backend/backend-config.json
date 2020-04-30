@@ -1,6 +1,6 @@
 {
 	"auth": {
-		"cmpe17289a6d05e": {
+		"cmpe172506f9cfb": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
 			"dependsOn": [],

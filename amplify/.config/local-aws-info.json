@@ -3,5 +3,10 @@
         "configLevel": "project",
         "useProfile": true,
         "profileName": "default"
+    },
+    "newdevenv": {
+        "configLevel": "project",
+        "useProfile": true,
+        "profileName": "default"
     }
 }

@@ -1,40 +1,40 @@
 {
 	"providers": {
 		"awscloudformation": {
-			"AuthRoleName": "amplify-cmpe172-devenv-100409-authRole",
-			"UnauthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-devenv-100409-unauthRole",
-			"AuthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-devenv-100409-authRole",
+			"AuthRoleName": "amplify-cmpe172-newdevenv-180548-authRole",
+			"UnauthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-newdevenv-180548-unauthRole",
+			"AuthRoleArn": "arn:aws:iam::586644652616:role/amplify-cmpe172-newdevenv-180548-authRole",
 			"Region": "us-east-1",
-			"DeploymentBucketName": "amplify-cmpe172-devenv-100409-deployment",
-			"UnauthRoleName": "amplify-cmpe172-devenv-100409-unauthRole",
-			"StackName": "amplify-cmpe172-devenv-100409",
-			"StackId": "arn:aws:cloudformation:us-east-1:586644652616:stack/amplify-cmpe172-devenv-100409/f36d6130-87df-11ea-90d7-0ac49251e793",
+			"DeploymentBucketName": "amplify-cmpe172-newdevenv-180548-deployment",
+			"UnauthRoleName": "amplify-cmpe172-newdevenv-180548-unauthRole",
+			"StackName": "amplify-cmpe172-newdevenv-180548",
+			"StackId": "arn:aws:cloudformation:us-east-1:586644652616:stack/amplify-cmpe172-newdevenv-180548/3cb21c80-8823-11ea-9d55-1288d43a03c2",
 			"AmplifyAppId": "d1g5lhnp5r1dux"
 		}
 	},
 	"auth": {
-		"cmpe17289a6d05e": {
+		"cmpe172506f9cfb": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
 			"dependsOn": [],
 			"customAuth": false,
 			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/amplify-cmpe172-devenv-100409-deployment/amplify-cfn-templates/auth/cmpe17289a6d05e-cloudformation-template.yml",
-				"logicalId": "authcmpe17289a6d05e"
+				"s3TemplateURL": "https://s3.amazonaws.com/amplify-cmpe172-newdevenv-180548-deployment/amplify-cfn-templates/auth/cmpe172506f9cfb-cloudformation-template.yml",
+				"logicalId": "authcmpe172506f9cfb"
 			},
-			"lastPushTimeStamp": "2020-04-26T17:19:11.250Z",
+			"lastPushTimeStamp": "2020-04-27T01:11:34.626Z",
 			"output": {
-				"AppClientSecret": "1m2n5lvlukn7j2982vogp6ed681r576unuhcjrjakdorskslnsuu",
-				"UserPoolId": "us-east-1_ZwUhM0WC1",
-				"AppClientIDWeb": "7ue9419909kpmrfjhq604r19f4",
-				"AppClientID": "4n1fkb8rarfhjqbc79kudue9c3",
-				"HostedUIDomain": "cmpe17289a6d05e-89a6d05e-devenv",
-				"IdentityPoolId": "us-east-1:b6045461-3f0b-4734-abca-79a745aa45d2",
-				"IdentityPoolName": "cmpe17289a6d05e_identitypool_89a6d05e__devenv",
+				"AppClientSecret": "fcthosej0rt6jma9nrjk40ll6n7thehvh9fqa2ih4vgc9jsvpi6",
+				"UserPoolId": "us-east-1_OaDB6jcKL",
+				"AppClientIDWeb": "4nc8a0tpgdj8aucbh9n01f0uv6",
+				"AppClientID": "1bnd23tnr1gstfk88fh5sb68ce",
+				"HostedUIDomain": "cmpe172506f9cfb-506f9cfb-newdevenv",
+				"IdentityPoolId": "us-east-1:bcfbdb9a-8713-4e78-a46d-3b166f8af820",
+				"IdentityPoolName": "cmpe172506f9cfb_identitypool_506f9cfb__newdevenv",
 				"OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"http://localhost:3000/\"],\"LogoutURLs\":[\"http://localhost:3000/\"]}",
-				"UserPoolName": "cmpe17289a6d05e_userpool_89a6d05e"
+				"UserPoolName": "cmpe172506f9cfb_userpool_506f9cfb"
 			},
-			"lastPushDirHash": "cDeQD35oFcb0QHhzUUiZCb46ov8="
+			"lastPushDirHash": "WKOxJLamCr8dIh++sgM+2fgegh4="
 		}
 	}
 }
