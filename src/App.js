@@ -5,6 +5,9 @@ import logo from "./logo.svg";
 import awsmobile from "./aws-exports";
 import { Input,TextField } from '@material-ui/core';
 
+// import api urls and api gateway protected key
+import {environement_values as env} from "./environment";
+
 // your Cognito Hosted UI configuration
 const oauth = {
 "domain": "cmpe172506f9cfb-506f9cfb-newdevenv.auth.us-east-1.amazoncognito.com",
@@ -54,6 +57,7 @@ class App extends Component {
           }
         }
         else this.setState({ user });
+        this.readUserData();
       })
       .catch(() => console.log("Not signed in"));
 
@@ -85,9 +89,9 @@ class App extends Component {
         const data = { "username": username };
         try{
             let xhr = new XMLHttpRequest();
-            await xhr.open("POST","URL", true);
+            await xhr.open("POST",env.API_QUERY_WITH_USERNAME_URL, true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.setRequestHeader("X-API-Key", "KEY");
+            xhr.setRequestHeader("X-API-Key", env.API_GATEWAY_KEY);
             xhr.send(JSON.stringify({ "username": username}));
             xhr.addEventListener("readystatechange", ()=> {
                 if(xhr.readyState == 4){
