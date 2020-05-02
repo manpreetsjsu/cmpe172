@@ -67,6 +67,7 @@ class App extends Component {
           const user = await Auth.signIn(username, password);
           console.log(user);
           this.setState({user:user,userConfirmed:true,error:null});
+          this.readUserData();
       } catch (error) {
           console.log('error signing in', error);
           this.setState({error:error});
@@ -74,7 +75,29 @@ class App extends Component {
             this.setState({userConfirmed:false});
           }
       }
-  } 
+  }
+
+    //This function reads data from the dynamodb
+    //output we be used to display on frontend
+    //url taken out because of security reasons
+    readUserData = async()=>{
+        const username = this.state.user.username;
+        const data = { "username": username };
+        try{
+            let xhr = new XMLHttpRequest();
+            await xhr.open("POST","URL", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.setRequestHeader("X-API-Key", "KEY");
+            xhr.send(JSON.stringify({ "username": username}));
+            xhr.addEventListener("readystatechange", ()=> {
+                if(xhr.readyState == 4){
+                    console.log(JSON.parse(xhr.responseText));
+                }
+            });
+        } catch (error) {
+            console.log('error getting data', error);
+        }
+    }
 
   signOut= async()=>{
     try {
@@ -168,10 +191,10 @@ resendConfirmationCode=async()=>{
             <>
               <Input onChange={this.handleEmailInput} placeholder="email"></Input>
               <br></br>
-              <Input onChange={this.handlePasswordInput} placeholder="password"></Input>
+              <Input onChange={this.handlePasswordInput} type="password" placeholder="password"></Input>
               <br></br>
               <div>
-                <Button color="primary" variant="contained" onClick={() => this.signInUser()}>Sign In </Button>
+                <Button color="primary" style={{margin: 20}} variant="contained" onClick={() => this.signInUser()}>Sign In </Button>
                 <Button color="primary" variant="contained" onClick={() => this.signUp()}>Sign Up </Button>
               </div>
             </>
