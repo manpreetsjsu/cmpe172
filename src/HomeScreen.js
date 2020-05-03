@@ -1,7 +1,7 @@
-import react, { Component } from "react";
+import React, { Component } from "react";
 
 
-class HomeScreen extends Component{
+export default class HomeScreen extends Component{
 
 
     render(){

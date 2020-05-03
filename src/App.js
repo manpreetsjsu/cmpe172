@@ -4,9 +4,18 @@ import Button from '@material-ui/core/Button';
 import logo from "./logo.svg";
 import awsmobile from "./aws-exports";
 import { Input,TextField } from '@material-ui/core';
+import QRCode from 'qrcode.react';
 
 // import api urls and api gateway protected key
 import {environement_values as env} from "./environment";
+import HomeScreen from  "./HomeScreen";
+
+const VALIDATE_TOTP_INSTRUCTIONS = "Please Input Temporary One Time Password [TOTP] from your Google Authenticator App in your device "
+                                    + " with which you have registered TOTP Account when you signed In first time."
+const REGISTER_TOTP_ACCOUNT_INSTRUCTION  = "Please Set Up Multi-factor Authentication to Secure your account. "
+                                + " Install Google Authenticator App on your device"
+                                + " Scan the QR Code or enter code manually to register for new TOTP Account" 
+                                + " Input the generated 6- Digit Code to verfiy and set up TOTP Account"
 
 // your Cognito Hosted UI configuration
 const oauth = {
@@ -41,43 +50,131 @@ class App extends Component {
           break;
         case "customOAuthState":
           this.setState({ customState: data });
+          break;
+        default:
+          break;
       }
     });
-    this.state = { user: null, customState: null, email:null, password:null, confirmationCode: null, userConfirmed:false,error:null };
+    this.state = { 
+      user: null, 
+      email:null, 
+      password:null, 
+      confirmationCode: null, 
+      error:null,
+      totp: null,
+      messageToUser:null
+     };
+
+     // save the initial base state
+     this.initialState = this.state;
 
   }
 
   componentDidMount() {
-    Auth.currentAuthenticatedUser()
+    Auth.currentAuthenticatedUser({bypassCache:true})
       .then((user) => {
         console.log(user);
-        if (user.attributes){
-          if(user.attributes.email_verified){
-            this.setState({user:user,userConfirmed:true});
-          }
-        }
-        else this.setState({ user });
-        this.readUserData();
+        this.setState({user});
       })
       .catch(() => console.log("Not signed in"));
 
   }
 
+  // only used first time setting up MFA for user - when user sign IN first time into app
+  // With your TOTP account in your TOTP-generating app (like Google Authenticator)
+  // Use the generated one-time password to verify the setup
+  confirmTotp=async(code)=>{
+    this.setState({error:null,messageToUser: "Confirming Code..."});
+    try{
+      const result = await Auth.verifyTotpToken(this.state.user,this.state.totp);
+      console.log("mFA set up result",result);
+      await this.setPreferredMFA();
+      // update the user as we updated preferred MFA to totp
+      const updatedUser = await Auth.currentAuthenticatedUser({bypassCache:true});
+      console.log("updated user",updatedUser);
+      this.setState({user:updatedUser,error:null,messageToUser:null});
+    }
+    catch(e){
+      console.log("Unable to verify totp ",e);
+      this.setState({error:e,messageToUser:null});
+    }
+
+  };
+
+  // after MFA is setup for user, user will always be required to enter totp from the app when signing in
+  // after signing in user , this validate the user's totp with aws server 
+  // Note - this is used after the user's tofp MFA has been set up 
+  confirmSignInWithTotp=async()=>{
+    this.setState({error:null,messageToUser: "Confirming Code..."});
+    try {
+      const user = await Auth.confirmSignIn(this.state.user, this.state.totp,this.state.user.challengeName);
+      console.log("MFA validation result", user);
+      // the above result does not contain preferredMFA attribute in the result, hence updating with below call
+      // this is just kinda slow - temp fix
+      let updatedUser = await Auth.currentAuthenticatedUser({bypassCache:true});
+      console.log("update user with currentAuthenthenticated Call", updatedUser);
+      this.setState({user:updatedUser,error:null,messageToUser:null});
+     
+  } catch (error) {
+      console.log('error signing in', error);
+      this.setState({error:error,messageToUser:null});
+  }
+  };
+
+  // handler for recording totp input 
+  handleTotp=(event)=>{
+    this.setState({totp:event.target.value});
+  };
+
+  // sets up MFA for the user after the user signed in first time into the app
+  setMultifactorauth=async()=>{
+    try{
+       const code = await Auth.setupTOTP(this.state.user);
+       console.log(code);
+       this.setState({code:code,error:null}); 
+    }
+    catch(e){
+      console.log("unable to generate QR code for setting up MFA ",e);
+      this.setState({error:e,messageToUser:null});
+    }
+  }
+
+  // update the user object in the cognito telling that user has set up totp as MFA
+  // next time user sign in, user will be asked for totp code 
+  setPreferredMFA=async()=>{
+    // don't forget to set TOTP as the preferred MFA method
+    try{
+      const data = await Auth.setPreferredMFA(this.state.user, 'TOTP');
+      console.log(data);
+      return data
+    }
+    catch(e){
+      console.log(e);
+      this.setState({error:e});
+      return e;
+    }
+  }
+
+  // validate user credentials with cognito
   signInUser=async()=>{
+      this.setState({error:null,messageToUser: "Validating Credentials..."});
       const username = this.state.email;
       const password = this.state.password;
       if(!this.validateUserInput()) return;
       try {
           const user = await Auth.signIn(username, password);
+
+          // user has not set up MFA, this means user is signing in first time after sign up
+          if(user.preferredMFA === "NOMFA"){
+            // generate QR code for the user to set up totp account in user's device's app such as google authenticator
+            await this.setMultifactorauth();
+          }
           console.log(user);
-          this.setState({user:user,userConfirmed:true,error:null});
-          this.readUserData();
+          this.setState({user:user,error:null,messageToUser:"Your Credentials Are Valid."});
+         
       } catch (error) {
           console.log('error signing in', error);
-          this.setState({error:error});
-          if(error.code === "UserNotConfirmedException"){
-            this.setState({userConfirmed:false});
-          }
+          this.setState({error:error,messageToUser:null});
       }
   }
 
@@ -92,9 +189,9 @@ class App extends Component {
             await xhr.open("POST",env.API_QUERY_WITH_USERNAME_URL, true);
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhr.setRequestHeader("X-API-Key", env.API_GATEWAY_KEY);
-            xhr.send(JSON.stringify({ "username": username}));
+            xhr.send(JSON.stringify(data));
             xhr.addEventListener("readystatechange", ()=> {
-                if(xhr.readyState == 4){
+                if(xhr.readyState === 4){
                     console.log(JSON.parse(xhr.responseText));
                 }
             });
@@ -106,16 +203,17 @@ class App extends Component {
   signOut= async()=>{
     try {
         await Auth.signOut({ global: true });
-        this.setState({user:null,error:null,email:null,password:null,userConfirmed:false,confirmationCode:null});
+        this.setState(this.initialState);
     } catch (error) {
         console.log('error signing out: ', error);
-        this.setState({error:error});
+        this.setState({error:error,messageToUser:null});
     }
 }
 
 signUp=async()=>{
   // user name and email needs to be same
   //cognito pool use email as username in the backend config
+    this.setState({error:null,messageToUser:"Signing Up..."});
     const username = this.state.email;
     const password = this.state.password;
     if(!this.validateUserInput()) return;
@@ -129,24 +227,26 @@ signUp=async()=>{
             }
         });
         console.log({ user });
-        this.setState({user,error:null});
+        this.setState({user,error:null,messageToUser:"Sign Up Successful. Please Check your email for confirmation code."});
     } catch (error) {
         console.log('error signing up:', error);
-        this.setState({error:error});
-        //UsernameExistsException
+        this.setState({error:error,messageToUser:null});
+        //UsernameExistsException can happen - not catching it
     }
 }
   
 confirmSignUp = async()=>{
+  this.setState({error:null,messageToUser:"Confirming Code..."})
   try {
     const user = await Auth.confirmSignUp(this.state.email, this.state.confirmationCode);
     console.log("confirmation result", user);
-
     // clear everything, as we want user to sign in with credentials
-    this.setState({user:null,error:null,email:null,password:null,userConfirmed:false,confirmationCode:null});
+    this.setState(this.initialState,()=>{
+      this.setState({messageToUser:"Your Email is Confirmed. Please Log In!"});
+    });
   } catch (error) {
       console.log('error confirming sign up', error);
-      this.setState({error:error});
+      this.setState({error:error,messageToUser:null});
   }
 }
 
@@ -164,24 +264,116 @@ handleConfirmationCode=(event)=>{
 
 validateUserInput = ()=>{
   if(!this.state.email || !this.state.password){
-    this.setState({error:{message:"Email/Password can not be empty"}});
+    this.setState({error:{message:"Email/Password can not be empty"},messageToUser:null});
     return false;
   }
   return true;
 }
 
 resendConfirmationCode=async()=>{
+  this.setState({error:null,messageToUser:"Resending Code..."})
   try {
       await Auth.resendSignUp(this.state.email);
+      this.setState({error:null,messageToUser:"Code Resent.Please Check Email"});
       console.log('code resent succesfully');
   } catch (error) {
       console.log('error resending code: ', error);
-      this.setState({error:error});
+      this.setState({error:error,messageToUser:null});
   }
 }
 
   render() {
-    const { user } = this.state;
+    let renderOutput = null ;
+    // user object exists
+    if(this.state.user){
+      // user is challenged to pass MFA
+      if(this.state.user.challengeName === "SOFTWARE_TOKEN_MFA"){
+          renderOutput = (
+            <>
+              <TextField
+                id="standard-full-width"
+                fullWidth
+                variant="outlined"
+                label="Instructions For TOTP"
+                multiline
+                variant="outlined"
+                rowsMax={8}
+                disabled
+                value={VALIDATE_TOTP_INSTRUCTIONS}
+              />
+              <br></br><br></br>
+              <Input variant="outlined" onChange={this.handleTotp} placeholder="Code From Your Device"></Input>
+              <br></br><br></br>
+              <Button color="primary" variant="contained" onClick={() => this.confirmSignInWithTotp()}>Confirm Code</Button>
+            </>
+          );
+      }
+      // user has not has not set up MFA... lets set it up ,, this will show QR code to user
+      else if (this.state.user.preferredMFA === "NOMFA" ){
+
+        renderOutput = (
+          <>
+            <TextField
+              id="standard-full-width"
+              label="Register TOTP Account in Device"
+              multiline
+              fullWidth
+              variant="outlined"
+              rowsMax={8}
+              disabled
+              value={REGISTER_TOTP_ACCOUNT_INSTRUCTION}
+            />
+            <Input onChange={this.handleTotp} placeholder="Code From Your Device"></Input>
+            <br></br><br></br>
+            <QRCode value={"otpauth://totp/AWSCognito:" + this.state.user.username + "?secret=" + this.state.code +"&issuer=aws"} />
+              <br></br><br></br>
+            <Button color="primary" variant="contained" onClick={() => this.confirmTotp()}>Confirm code</Button>
+          </>
+        );
+      }
+
+      // user email is not confirmed ,, lets confirm it 
+      else if (this.state.user.userConfirmed === false ){
+        renderOutput = (
+          <>
+            <br></br><br></br>
+            <Input onChange={this.handleConfirmationCode} placeholder="Confirmation Code"></Input>
+            <br></br>
+            <Button color="primary" variant="contained" onClick={() => this.confirmSignUp()}>Confirm Code</Button>
+            <br></br>
+            <Button color="primary" variant="contained" onClick={() => this.resendConfirmationCode()}>Resend Confirmation Code</Button>
+          </>
+        );
+      }
+
+      // finaly if user has set MFA, we can allow him to access our app
+      else if (this.state.user.preferredMFA === "SOFTWARE_TOKEN_MFA" ){
+        renderOutput = (
+          <>
+            {/*  HomeScreen code goes Here... */}
+            <HomeScreen></HomeScreen>
+            <Button color="primary" variant="contained" onClick={() => this.signOut()}>Sign Out</Button>
+            <br></br>
+          </>
+        );
+      }
+    }
+
+    // user is not signed in , no user object in state exists 
+    else{
+      renderOutput = (
+        <>
+        <Input onChange={this.handleEmailInput} placeholder="email"></Input>
+        <br></br>
+        <Input onChange={this.handlePasswordInput} type="password" placeholder="password"></Input>
+        <br></br>
+        <div>
+          <Button color="primary" style={{margin: 20}} variant="contained" onClick={() => this.signInUser()}>Sign In </Button>
+          <Button color="primary" variant="contained" onClick={() => this.signUp()}>Sign Up </Button>
+        </div>
+      </>
+      );
+    }
 
     return (
       <div style={{
@@ -189,45 +381,39 @@ resendConfirmationCode=async()=>{
         flexDirection:"column",
         alignItems:"center"
       }}>
-        <img src={logo} height="100"></img>
-        {/* // if user is not logged in */}
-          {!this.state.user && 
-            <>
-              <Input onChange={this.handleEmailInput} placeholder="email"></Input>
-              <br></br>
-              <Input onChange={this.handlePasswordInput} type="password" placeholder="password"></Input>
-              <br></br>
-              <div>
-                <Button color="primary" style={{margin: 20}} variant="contained" onClick={() => this.signInUser()}>Sign In </Button>
-                <Button color="primary" variant="contained" onClick={() => this.signUp()}>Sign Up </Button>
-              </div>
-            </>
-          }
-          {/* if user is logged in  and confirmed*/}
-          {
-            this.state.user && this.state.userConfirmed &&
-              <>
-                <div>Welcome to CMPE 172 Project!</div>
-                <Button color="primary" variant="contained" onClick={() => this.signOut()}>Sign Out</Button>
-              </>
-          }
-          {/* user has signed up but did not confirmed yet */}
-          {
-            this.state.user && !this.state.userConfirmed &&
-              <>
-                <Input onChange={this.handleConfirmationCode} placeholder="Confirmation Code"></Input>
-                <br></br>
-                <Button color="primary" variant="contained" onClick={() => this.confirmSignUp()}>Confirm Code</Button>
-                <br></br>
-                <Button color="primary" variant="contained" onClick={() => this.resendConfirmationCode()}>Resend Confirmation Code Code</Button>
-              </>
-          }
+        <img src={logo} alt="" height="100"></img>
+        {renderOutput}          
           {/* if there is any error */}
           {  
             this.state.error &&
               <>
                 <br></br>
-                <TextField disabled color="secondary" value={this.state.error.message}></TextField>
+                <TextField 
+                error
+                multiline
+                rowsMax={3}
+                label="Error"
+                id="outlined-error-helper-text" 
+                disabled 
+                variant="outlined"
+                value={this.state.error.message}
+                />
+              </>
+          }
+          {/* any message to user */}
+          {  
+            this.state.messageToUser &&
+              <>
+                <br></br>
+                <TextField 
+                rowsMax={4}
+                multiline
+                label="Message"
+                id="outlined-margin-normal"
+                disabled 
+                variant="outlined"
+                value={this.state.messageToUser}
+                />
               </>
           }
       </div>
