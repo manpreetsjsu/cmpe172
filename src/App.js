@@ -5,15 +5,9 @@ import logo from "./logo.svg";
 import awsmobile from "./aws-exports";
 import { Input,TextField } from '@material-ui/core';
 import QRCode from 'qrcode.react';
-import CourseSearch from "./CourseSearch";
 // import api urls and api gateway protected key
-<<<<<<< HEAD
-import {environement_values as env} from "./environment";
-
-=======
 import {environement_read_values as env} from "./environment";
-import HomeScreen from  "./HomeScreen";
->>>>>>> master
+import HomeScreenNavigator from  "./HomeScreenNavigator";
 
 const VALIDATE_TOTP_INSTRUCTIONS = "Please Input Temporary One Time Password [TOTP] from your Google Authenticator App in your device "
                                     + " with which you have registered TOTP Account when you signed In first time."
@@ -359,13 +353,9 @@ resendConfirmationCode=async()=>{
         renderOutput = (
           <>
             {/*  HomeScreen code goes Here... */}
-<<<<<<< HEAD
-            <CourseSearch></CourseSearch>
-            <Button color="primary" variant="contained" onClick={() => this.signOut()}>Sign Out</Button>
-            <br></br>
-=======
-            <HomeScreen signOut={this.signOut} username={this.state.user.username}/>
->>>>>>> master
+            {/* <CourseSearch></CourseSearch>
+            <Button color="primary" variant="contained" onClick={() => this.signOut()}>Sign Out</Button> */}
+            <HomeScreenNavigator signOut={this.signOut} username={this.state.user.username}/>
           </>
         );
       }

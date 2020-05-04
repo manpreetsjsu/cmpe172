@@ -49,13 +49,11 @@ export default function SimpleCard(props) {
           {section.classTime}
         </Typography>
         <Typography variant="body2" component="p">
-          well meaning and kindly.
-          <br />
-          {'"a benevolent smile"'}
+         {courseData.className}
         </Typography>
       </CardContent>
       <CardActions>
-        <Button onClick={()=>props.addToCart(section)} size="small">Add to Cart</Button>
+        <Button variant="contained" onClick={()=>props.addToCart(section,courseData)} size="small">Add to Cart</Button>
       </CardActions>
     </Card>
   );
