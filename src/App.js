@@ -7,7 +7,7 @@ import { Input,TextField } from '@material-ui/core';
 import QRCode from 'qrcode.react';
 
 // import api urls and api gateway protected key
-import {environement_values as env} from "./environment";
+import {environement_read_values as env} from "./environment";
 import HomeScreen from  "./HomeScreen";
 
 const VALIDATE_TOTP_INSTRUCTIONS = "Please Input Temporary One Time Password [TOTP] from your Google Authenticator App in your device "
@@ -74,7 +74,7 @@ class App extends Component {
     Auth.currentAuthenticatedUser({bypassCache:true})
       .then((user) => {
         console.log(user);
-        this.setState({user});
+        this.setState({user:user});
       })
       .catch(() => console.log("Not signed in"));
 
@@ -290,6 +290,7 @@ resendConfirmationCode=async()=>{
       if(this.state.user.challengeName === "SOFTWARE_TOKEN_MFA"){
           renderOutput = (
             <>
+                <img src={logo} alt="" height="100"></img>
               <TextField
                 id="standard-full-width"
                 fullWidth
@@ -313,6 +314,7 @@ resendConfirmationCode=async()=>{
 
         renderOutput = (
           <>
+              <img src={logo} alt="" height="100"></img>
             <TextField
               id="standard-full-width"
               label="Register TOTP Account in Device"
@@ -336,8 +338,9 @@ resendConfirmationCode=async()=>{
       else if (this.state.user.userConfirmed === false ){
         renderOutput = (
           <>
+              <img src={logo} alt="" height="100"></img>
             <br></br><br></br>
-            <Input onChange={this.handleConfirmationCode} placeholder="Confirmation Code"></Input>
+            <Input onChange={this.handleConfirmationCode} type="password" placeholder="Confirmation Code"></Input>
             <br></br>
             <Button color="primary" variant="contained" onClick={() => this.confirmSignUp()}>Confirm Code</Button>
             <br></br>
@@ -347,13 +350,11 @@ resendConfirmationCode=async()=>{
       }
 
       // finaly if user has set MFA, we can allow him to access our app
-      else if (this.state.user.preferredMFA === "SOFTWARE_TOKEN_MFA" ){
+      else if (this.state.user.preferredMFA === "SOFTWARE_TOKEN_MFA" && this.state.user.username ){
         renderOutput = (
           <>
             {/*  HomeScreen code goes Here... */}
-            <HomeScreen></HomeScreen>
-            <Button color="primary" variant="contained" onClick={() => this.signOut()}>Sign Out</Button>
-            <br></br>
+            <HomeScreen signOut={this.signOut} username={this.state.user.username}/>
           </>
         );
       }
@@ -363,6 +364,7 @@ resendConfirmationCode=async()=>{
     else{
       renderOutput = (
         <>
+            <img src={logo} alt="" height="100"></img>
         <Input onChange={this.handleEmailInput} placeholder="email"></Input>
         <br></br>
         <Input onChange={this.handlePasswordInput} type="password" placeholder="password"></Input>
@@ -381,7 +383,6 @@ resendConfirmationCode=async()=>{
         flexDirection:"column",
         alignItems:"center"
       }}>
-        <img src={logo} alt="" height="100"></img>
         {renderOutput}          
           {/* if there is any error */}
           {  
