@@ -111,9 +111,10 @@ class ClassSchedule extends Component {
         let renderOutput = null;
         if (this.state.display) {
             const rows = this.state.classes || [] ;
+            const name = this.state.user.userAttributes.request.userAttributes.email + "\'s" || "";
             renderOutput = (<>                      
                     <br/><br/>
-                    <h1 style={{alignSelf: "center"}}>Sar's Schedule</h1>
+                    <h1 style={{alignSelf: "center"}}>{name} Schedule</h1>
                     <TableContainer component={Card} style={{width: "500px", alignSelf: "center"}}>
                         <Table aria-label="simple table">
                             <TableHead>
