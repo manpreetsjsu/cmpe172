@@ -66,3 +66,50 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+
+### Deploying to docker and Elastic Beanstalk
+
+1) Create file 'Dockerfile' and place in project root
+2) Paste the following into the 'Dockerfile':
+    FROM node:version
+    container .
+
+    WORKDIR /app
+
+    COPY . /app
+
+    RUN npm install
+
+    CMD npm start
+
+    EXPOSE 3000
+2) Replace 'version' with installed version of node.js (can be found using node -v in cli)
+3) Create '.dockerignore' file and place in project root
+4) Paste the following into the '.dockerignore' file:
+    node_modules
+    npm-debug.log
+5) Build Docker using:
+    *Using terminal or command line, CD into project root directory*
+    docker build -t <ContainerName> .
+    (replace <ContainerName> with the name of the container you would like to create)
+6) Run Docker to test if container works:
+    docker run -it -p 8081:3000 <ContainerName>
+
+7) Elastic Beanstalk steps
+    Install Elastic Beanstalk CLI: https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html#eb-cli3-install.scripts
+    *Requires python to be installed*
+ 8) Initialize EB
+    eb init
+    *say no to CodeCommit, ssh options and Spot Feelt options*
+9) create EB environment
+    eb create
+    select defaults
+10) Depoloy EB
+    eb deploy
+    *if no environment selected error shows up:*
+        eb use <environmentName>
+        (Default environment is set to <DirectoryName-Dev>)
+            *replace DirectoryName with the name of your current Directory*
+11) Confirm EB is deployed:
+    eb open
