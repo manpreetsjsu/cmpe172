@@ -159,5 +159,34 @@ const availableClasses=
 
             ]
         },
+        {   
+            className: "CS 149", 
+            sections: [
+                {sectionNumber: "1",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed",professorName: "Benjamin Reed" },
+                {sectionNumber: "2",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed", professorName: "Kong Li"},
+                {sectionNumber: "3",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed", professorName: "William Andreapolous"},
+
+            ]
+        },
+        {   
+            className: "CS 159", 
+            sections: [
+                {sectionNumber: "1",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed",professorName: "Robert Chun" },
+            ]
+        },
+        {   
+            className: "CMPE 187", 
+            sections: [
+                {sectionNumber: "1",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed",professorName: "Badari Eswar" },
+            ]
+        },
+        {   
+            className: "CMPE 148", 
+            sections: [
+                {sectionNumber: "1",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed",professorName: "Frank Lin" },
+                {sectionNumber: "2",classTime: "6:00PM-8:45PM", classDay: "Mon-Wed", professorName: "Rod Fatoohi"},
+
+            ]
+        },
 
     ];
