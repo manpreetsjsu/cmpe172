@@ -1,0 +1,66 @@
+
+{
+
+
+
+    "AWSEBDockerrunVersion": "1",
+    
+    
+    
+        "Image": {
+    
+    
+    
+            "Name": "gt408/tegh-repo:mytag",
+    
+    
+    
+            "Update": "true"
+    
+    
+    
+        },
+    
+    
+    
+        "Authentication":{
+    
+    
+    
+            "Bucket": "tegh172",
+    
+    
+    
+            "Key": "config.json"
+    
+    
+    
+        },
+    
+    
+    
+        "Ports": [
+    
+    
+    
+            {
+    
+    
+    
+                "ContainerPort": "80"
+    
+    
+    
+            }
+    
+    
+    
+        ]
+    
+    
+    
+    }
+    
+    
+    
+    
