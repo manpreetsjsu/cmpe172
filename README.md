@@ -1,254 +1,141 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-### Project Description
-This project aims to provide a faster and more flexible course registration system in order to improve user experience.
-Tools used in the implementaion of this project include AWS API Gateway, AWS Lambda, AWS Amplify, and AWS Cognito.
-This project is deployed on Elastic Beanstalk using Docker. Application is available at : http://3-env.eba-2pirw3rt.us-west-1.elasticbeanstalk.com/
-## Available Scripts
+- University Name - San Jose State University
+- Course: Enterprise Software - CMPE172/ Spring 2020 
+- Team Members - TeghBir Gill, Sarangpreet Singh Padda, Manpreet Singh
+- Project Introduction 
+> The current MYSJSU course selection tool is integrated into the overall MYSJSU webpage in a way that causes frequent problems in terms of performance and user experience. Refreshing the page, or going back to a previous page resets the user back to the homepage, instead of directing them to their previous view. In addition, the filtering system is slow and lacks flexibility. With this in mind, the goal for our team was to build an application that is more smooth and streamlined that will be easy to scale.
 
-In the project directory, you can run:
+>This project aims to provide a faster and more flexible course registration system in order to improve user experience. Tools used in the implementaion of this project include AWS API Gateway, AWS Lambda, AWS Amplify, and AWS Cognito.   
+>This project is deployed on Elastic Beanstalk using Docker. Application is available at : http://3-env.eba-2pirw3rt.us-west-1.elasticbeanstalk.com/   
 
-### `npm start`
+- Demo Screenshots  
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+**Sign In With AWS Cognito**  
+![SignIn](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/signIn.PNG)
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+**Set Up Multi Factor Authentication With One Time Access Password (OTAP)**  
+![MFA](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/setupotp.PNG)
 
-### `npm test`
+**Class Schedule**  
+![Schedule](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/schedule.PNG)
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+**Add Classes**  
+![Add Classes](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/addclasses.PNG)
 
-### `npm run build`
+**Check Out Cart**  
+![Add Classes](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/cart.PNG)
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Pre-requisites for setup : Node 10 (https://nodejs.org/en/download/)  
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+##  Instructions on how to run the project locally.
+```  
+git clone https://github.com/manpreetsjsu/cmpe172.git    
+npm install     //Install Dependencies  
+npm start       //Start Server to Run App 
+```   
+Open (http://localhost:3000) to view it in the browser. 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## System/Architecture Diagram    
+![Architecture](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/cmpe172+backend+(1).png)  
 
-### `npm run eject`
+## Deploying with Docker
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1) Create file **Dockerfile** and place in root directory of project
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2) Paste the following into the 'Dockerfile':  
+```  
+FROM node:12.16.3 as build
+RUN mkdir /usr/src/app
+WORKDIR /usr/src/app
+ENV PATH /usr/src/app/node_modules/.bin:$PATH
+COPY package.json /usr/src/app/package.json
+RUN npm install --silent
+RUN npm install react-scripts -g --silent
+COPY . /usr/src/app
+RUN npm run build
+FROM nginx:1.13.12-alpine
+COPY --from=build /usr/src/app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```  
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+3) Replace **version** with installed version of node.js (can be found using node -v in cli)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+4) Create **.dockerignore** file in root of the directory and paste these contents  
+    ```  
+    node_modules
+    npm-debug.log
+    .git
+    .gitignore
+    ```  
 
-## Learn More
+5) Build Docker using terminal or command line  
+`docker build -t <ContainerName> <projectDirectory>`  
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+6) Run Docker to test if container works:  
+`docker run -it -p 8081:3000 <ContainerName>`  
 
 
-### Deploying to docker and Elastic Beanstalk
-## Docker/Docker Hub
+## Deploy React App to ElasticBeanStalk using image on DockerHub
 
-**Prerequisites: A Docker Account, Installation of Docker**
-
-**Create Dockerfile in project root directory with the following:**
-
-Change the node version to match the version installed on your machine
-
-`FROM node:12.16.3  as build  `
+1.  Deploy the docker image created with the **Dockerfile** to docker hub account
+```
+docker tag <ImageId> <dockerHubUsername>/<ImageName>:<TagName>
+docker push <ImageId> <dockerHubUsername>/<ImageName>
+```
+![example Image on DockerHub](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/dockerHubCmpe172Image.PNG)
  
-`RUN mkdir /usr/src/app  `
- 
-`WORKDIR /usr/src/app  `
- 
-`ENV PATH /usr/src/app/node_modules/.bin:$PATH  `
- 
-`COPY package.json /usr/src/app/package.json  `
- 
-`RUN npm install --silent  `
- 
-`RUN npm install react-scripts -g --silent  `
- 
-`COPY . /usr/src/app  `
- 
-`RUN npm run build  `
- 
-`FROM nginx:1.13.12-alpine  `
- 
-`COPY --from=build /usr/src/app/build /usr/share/nginx/html  `
- 
-`EXPOSE <portNumber>  `
- 
-`CMD ["nginx", "-g", "daemon off;"]`
+2.  Create **Dockerrun.aws.json** file in root directory of the project
+**Put the following json code snippet in file**
+```
+{
+"AWSEBDockerrunVersion": "1",
+	"Image": {
+		"Name": "<dockerUsername>/<image>:<tag>",
+		"Update": "true"
+	},
+	"Authentication":{
+		"Bucket": "cmpe172-s3-docker",
+		"Key": "config.json"
+	},
+	"Ports": [
+		{
+			"ContainerPort": "80"
+		}
+	]
+}
+```
+**To Understand the above code snippet, look for how to Using images from a private repository**
 
+(https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/single-container-docker-configuration.html#single-container-docker-configuration.dockerrun)  
 
-  
+3.  In order to access the private repositry of docker hub, we have to give elastic bean credentials to access the image on the docker hub. In OS, Docker's **config.json** has docker credentials.
+	```
+	cd ~
+	cd ./dockerfile
+	cat config.json
+	```  
+    > For windows config.json can be found in ‘C:\Users<yourUsername>.docker’  
 
-**Create .dockerignore file in the root directory with the following:**
+    > For MacOS config.json can be found in ‘/Users//.docker’  
+    > (press command+shift+. To display hidden folders)  
 
-  
+4. Upload the **config.json** file to S3 bucket [create new bucket or existing bucket]
 
-`node_modules`
- 
-`npm-debug.log  `
- 
-`.git  `
- 
-`.gitignore`
+5. Create new AWS IAM Role to provide EC2 access of the S3 bucket created in above step. Create the IAM Role choosing EC2 service and provide S3 bucket access to EC2. (https://www.youtube.com/watch?v=pLw6MLqwmew)  
 
-**Build Docker using terminal or command line:**
+![Create New Role](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/createRoleForEc2.PNG)  
 
-`docker build -t <ContainerName> <projectDirectory>`
+**Attach S3 Get Object Policy. We are attaching S3 Full Access for ease**   
+![Attach Policy](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/attachPolicy.PNG)  
 
-**Run docker to test if the container works:**
+6. Create New Elastic Bean Application. Create New Environment by configuring these options:-    
+![Choose these Config Options](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/ebCreateEnvSample.PNG)   
+![Upload Dockerrun.aws.json file](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/ebUploadDockerFile.PNG)   
 
-`docker run -it -p 8081:<portNumber> <ContainerName>`
+**Choose Configure More Option and Select this Option**  
+![config Options](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/ebEC2IAMRole.PNG)    
 
-  
-  
-  
-  
-  
-**Push docker image to Docker Hub**
+**Choose the AWS IAM Role created in Step5**  
+![IAM Role for giving Access to EC2](https://cmpe172-project.s3.amazonaws.com/imagesForReadMe/ebSelectIamRole.PNG)    
 
-Log into [https://hub.docker.com/](https://hub.docker.com/) and then click ‘create repository’
-
-**Log in to Docker from terminal or command line**
-
-`docker login --username=yourHubUsername --email=youremail@company.com`
-
-  
-
-**Find docker Image with the previously set container name**
-
-  
-
-`docker images`
-
-  
-  
-
-**Tag the Image**
-
-`Docker tag <IMAGE ID> <yourHubUsername>/<repositoryName>:<yourTag>`
-
-**Push image to docker**
-
-  
-
-`docker push <yourHubUsername>/<dockerHubRepository>`
-
-  
-
-## AWS IAM
-
-Create a new AWS IAM Role to provide EC2 access to the above S3 bucket. Create the IAM role for the EC2 Use case and provide AmazonS3FullAccess ([https://www.youtube.com/watch?v=pLw6MLqwmew](https://www.youtube.com/watch?v=pLw6MLqwmew))
-
-  
-
-![](https://lh4.googleusercontent.com/5CHFxM6ahvUsPrpifx5ZMSsaQvAtlrvDI1FF_16eh3rX_rJ1qANTwvnSA5FhC_wiHe0dPYkf2rPl48S3KL8YGA6hsshVqShzxdZNxdj3HYasWrDfmrf0Zs0bXysDZUPzgBlBtsV4)
-
-  
-
-![](https://lh6.googleusercontent.com/KlJ-PZf_bwmQIZxu64tlyKUSFjGVvWHTsbuOOZIWRK0i9GuWxscZhMAY3LJ8SL1RYi6yeUGgDzrfTEq2NW2vWS9CfNLlzmUsocvNaYih3hm0jCJAPhUSHsL86YEnlhvlqB6tpqSk)
-
-  
-
-## AWS Elastic Beanstalk
-
-  
-  
-
-Create ‘Dockerrun.aws.json’ file in project root directory with the following:
-
-  
-
-`{`
-
-`"AWSEBDockerrunVersion": "1",`
-
-`"Image": {`
-
-`"Name": "<dockerUsername>/<repositoryName>:<tag>",`
-
-`"Update": "true"`
-
-`},`
-
-`"Authentication":{`
-
-`"Bucket": "<nameOfS3Bucket>",`
-
-`"Key": "config.json"`
-
-`},`
-
-`"Ports": [`
-
-`{`
-
-`"ContainerPort": "80"`
-
-`}`
-
-`]`
-
-`}`
-
-  
-  
-
-**Find the config.json file in the .docker directory and upload to S3 bucket [create a new bucket or use an existing one]**
-
-*For windows config.json can be found in ‘C:\Users\<yourUsername>\.docker’*
-
-*For MacOS config.json can be found in ‘/Users/<yourUsername>/.docker’*
-
-*(press command+shift+. To display hidden folders)*
-
-  
-
-**Create a new Elastic Beanstalk Application**
-
--   Enter an Application name
-    
--   Pick Docker as the Platform
-    
--   Select ‘Upload your code’
-    
--   Upload the Dockerrun.aws.json file
-    
--   Select ‘Configure more options’
-    
--   Edit Security
-    
--   Add the previously created IAM Role in the IAM instance profile option under the Virtual Machine permissions section
-    
--   Click ‘Save’
-    
--   Click ‘Create environment’
+7. **Save & Create the Environment. Environment Creation Will take some time. If you encounter errors, please see the logs [Request Last 100 lines or download full logs] These will really help you to troubleshoot the problem**    
