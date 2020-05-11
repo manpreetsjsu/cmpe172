@@ -1,5 +1,8 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
+### Project Description
+This project aims to provide a faster and more flexible course registration system in order to improve user experience.
+Tools used in the implementaion of this project include AWS API Gateway, AWS Lambda, AWS Amplify, and AWS Cognito.
+This project is deployed on Elastic Beanstalk using Docker. Application is available at : http://3-env.eba-2pirw3rt.us-west-1.elasticbeanstalk.com/
 ## Available Scripts
 
 In the project directory, you can run:
