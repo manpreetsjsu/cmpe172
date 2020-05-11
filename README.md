@@ -111,8 +111,11 @@ Change the node version to match the version installed on your machine
   
 
 `node_modules`
+ 
 `npm-debug.log  `
+ 
 `.git  `
+ 
 `.gitignore`
 
 **Build Docker using terminal or command line:**
